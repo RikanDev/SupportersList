@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>후원자 명단 - Supporters</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Banner -->
+    <header class="bg-white border-b border-slate-200 shadow-sm py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">🙏 후원자 분들을 소개합니다</h1>
+            <p class="mt-2 text-sm sm:text-base text-slate-600">개발과 프로젝트를 지속할 수 있도록 따뜻한 마음을 보내주신 소중한 분들입니다.</p>
+            
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+                <a href="https://blog.naver.com/rikandev/223874007903" target="_blank" class="inline-flex items-center px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition shadow-sm">
+                    ✨ 후원 방법 안내 보기
+                </a>
+                <button onclick="copyEmail()" class="relative inline-flex items-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 transition">
+                    ✉️ 문의 메일 복사 (rikandev@gmail.com)
+                    <span id="copy-toast" class="absolute -top-9 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-md opacity-0 pointer-events-none transition-opacity duration-200 whitespace-nowrap">메일 주소 복사완료!</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+
+        <!-- Notice Box -->
+        <section class="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-5 text-sm text-amber-900 leading-relaxed shadow-sm">
+            <h3 class="font-semibold text-amber-950 mb-2 flex items-center gap-1.5 text-base">
+                📌 후원자 명단 공개 및 정정 관련 안내
+            </h3>
+            <ul class="list-disc list-inside space-y-1.5 text-amber-900/90">
+                <li>닉네임이 실명이실 경우 기본적으로 <b>중앙을 가려드린 채</b> 공개하고 있습니다.</li>
+                <li>전체 이름 공개 요청, 기재 자체를 원치 않아 삭제 요청, 다른 이름으로 변경 원하시는 경우, 혹은 기부하셨으나 누락된 경우 등은 상기된 이메일(<code class="bg-amber-100 px-1.5 py-0.5 rounded font-mono text-xs">rikandev@gmail.com</code>)로 연락해 주시면 감사하겠습니다.</li>
+                <li>별도 요청이 없을 시 기부 금액은 미공개를 기본으로 하고 있으며, 금액 공개를 원하실 경우에도 별도 문의해 주시면 기재해 드립니다.</li>
+            </ul>
+        </section>
+
+        <!-- Platform Tabs -->
+        <div class="flex border-b border-slate-200 mb-6 gap-2">
+            <button onclick="switchTab('naver')" id="tab-naver" class="pb-3 px-5 font-semibold text-base border-b-2 border-emerald-600 text-emerald-600 transition">
+                💚 네이버 페이 후원자
+            </button>
+            <button onclick="switchTab('kakao')" id="tab-kakao" class="pb-3 px-5 font-semibold text-base border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+                💛 카카오 페이 후원자
+            </button>
+        </div>
+
+        <!-- Search & Info Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+            <div class="text-sm text-slate-500 font-medium" id="total-count">
+                총 <span class="text-slate-900 font-bold">0</span>명의 후원자
+            </div>
+            <div class="w-full sm:w-72">
+                <input type="text" id="search-input" oninput="handleSearch()" placeholder="후원자명 또는 메시지 검색..." class="w-full px-4 py-2 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm">
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider font-semibold">
+                            <th class="py-3.5 px-6 w-32">일시</th>
+                            <th class="py-3.5 px-6">후원자 / 응원 메시지</th>
+                            <th class="py-3.5 px-6 w-28 text-center">금액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supporters-tbody" class="divide-y divide-slate-100 text-sm text-slate-700">
+                        <!-- JS Dynamic Insertion -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden py-16 text-center text-slate-400">
+                검색 결과가 없습니다.
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="flex justify-center items-center px-6 py-4 bg-slate-50/50 border-t border-slate-200 text-sm">
+                <!-- JS Dynamic Pagination -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Frontend Script -->
+    <script>
+        let allData = { naver: [], kakao: [] };
+        let currentTab = 'naver';
+        let currentPage = 1;
+        let itemsPerPage = 15;
+        let searchQuery = '';
+
+        function copyEmail() {
+            navigator.clipboard.writeText('rikandev@gmail.com').then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.classList.remove('opacity-0');
+                setTimeout(() => toast.classList.add('opacity-0'), 1500);
+            });
+        }
+
+        // Parse date for sorting (YY.MM.DD -> YYYYMMDD)
+        function parseDate(dateStr) {
+            const parts = (dateStr || '').trim().split('.');
+            if (parts.length === 3) {
+                return '20' + parts[0] + parts[1].padStart(2, '0') + parts[2].padStart(2, '0');
+            }
+            return dateStr;
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch('supporters.json');
+                allData = await response.json();
+                
+                // Sort by latest date (최신순)
+                ['naver', 'kakao'].forEach(key => {
+                    if (allData[key]) {
+                        allData[key].sort((a, b) => parseDate(b.date).localeCompare(parseDate(a.date)));
+                    }
+                });
+
+                render();
+            } catch (error) {
+                console.error('Failed to load supporters data:', error);
+                document.getElementById('supporters-tbody').innerHTML = `<tr><td colspan="3" class="py-8 text-center text-rose-500">데이터를 불러오지 못했습니다. supporters.json 파일을 확인해주세요.</td></tr>`;
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            currentPage = 1;
+            document.getElementById('search-input').value = '';
+            searchQuery = '';
+
+            if (tab === 'naver') {
+                document.getElementById('tab-naver').className = "pb-3 px-5 font-semibold text-base border-b-2 border-emerald-600 text-emerald-600 transition";
+                document.getElementById('tab-kakao').className = "pb-3 px-5 font-semibold text-base border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
+            } else {
+                document.getElementById('tab-kakao').className = "pb-3 px-5 font-semibold text-base border-b-2 border-amber-500 text-amber-600 transition";
+                document.getElementById('tab-naver').className = "pb-3 px-5 font-semibold text-base border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition";
+            }
+            render();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            let list = allData[currentTab] || [];
+            
+            if (searchQuery) {
+                list = list.filter(item => 
+                    item.name.toLowerCase().includes(searchQuery) || 
+                    item.date.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            document.querySelector('#total-count span').textContent = list.length;
+
+            const totalPages = Math.ceil(list.length / itemsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedItems = list.slice(start, start + itemsPerPage);
+
+            const tbody = document.getElementById('supporters-tbody');
+            const emptyState = document.getElementById('empty-state');
+            
+            tbody.innerHTML = '';
+
+            if (paginatedItems.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                paginatedItems.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50/80 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-6 text-slate-500 font-mono text-xs sm:text-sm">${item.date}</td>
+                        <td class="py-3 px-6 font-medium text-slate-800">${escapeHtml(item.name)}</td>
+                        <td class="py-3 px-6 text-center text-slate-400 text-xs">${item.amount || '-'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const paginationEl = document.getElementById('pagination');
+            if (totalPages <= 1) {
+                paginationEl.innerHTML = `<span class="text-slate-400 text-xs">페이지 1 / 1</span>`;
+                return;
+            }
+
+            let html = '<div class="flex items-center gap-1.5">';
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    html += `<button class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-semibold text-sm shadow-sm">${i}</button>`;
+                } else {
+                    html += `<button onclick="changePage(${i})" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 font-medium text-sm transition">${i}</button>`;
+                }
+            }
+            html += '</div>';
+            paginationEl.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            render();
+            // 스크롤 이동 로직 제거됨
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
