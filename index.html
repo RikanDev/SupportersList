@@ -123,7 +123,13 @@
 
         async function loadData() {
             try {
-                const response = await fetch('supporters.json');
+                // [정석 적용] cache: 'no-cache' 옵션과 타임스탬프 쿼리를 결합하여 캐시 무력화
+                const response = await fetch('supporters.json?t=' + Date.now(), {
+                    cache: 'no-cache'
+                });
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 allData = await response.json();
                 
                 // Sort by latest date (최신순)
@@ -226,7 +232,6 @@
         function changePage(page) {
             currentPage = page;
             render();
-            // 스크롤 이동 로직 제거됨
         }
 
         function escapeHtml(text) {
